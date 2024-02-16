@@ -1,4 +1,4 @@
-use clar2wasm::tools::crosscheck_compare_only;
+use clar2wasm::tools::{crosscheck, crosscheck_compare_only};
 use clarity::vm::types::{ListTypeData, SequenceSubtype, StringSubtype, TypeSignature};
 use proptest::strategy::{Just, Strategy};
 use proptest::{prop_oneof, proptest};
@@ -28,7 +28,7 @@ proptest! {
     #![proptest_config(super::runtime_config())]
 
     #[test]
-    fn crossprop_map_list(
+    fn crossprop_map_lte(
         vals in strategies_for_list()
         .prop_map(generate_list)
         .prop_flat_map(|l| proptest::collection::vec(l, 1..=10))) {
@@ -37,8 +37,8 @@ proptest! {
             if let [arg1, arg2] = chunk {
                 let cmd = format!(
                     "(map <= {} {})",
-                    arg1.to_string().replace('(', "(list "),
-                    arg2.to_string().replace('(', "(list ")
+                    PropValue(arg1.clone()),
+                    PropValue(arg2.clone())
                 );
 
                 crosscheck_compare_only(&cmd);
@@ -51,9 +51,20 @@ proptest! {
     #![proptest_config(super::runtime_config())]
 
     #[test]
-    fn crossprop_map_seq(vals in PropValue::any_sequence(20usize)) {
+    fn crossprop_map_len(vals in PropValue::any_sequence(20usize)) {
         crosscheck_compare_only(
             &format!("(map + (list (len {vals})))")
         )
+    }
+}
+
+proptest! {
+    #![proptest_config(super::runtime_config())]
+
+    #[test]
+    fn crossprop_map_is_eq(vals in PropValue::any_sequence(5usize)) {
+        let snippet = &format!("(and (fold or (map not (list (is-eq {vals} {vals}) (is-eq {vals} {vals}))) true))");
+
+        crosscheck(snippet, Ok(Some(Value::Bool(true))));
     }
 }
