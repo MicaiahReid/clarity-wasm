@@ -19,7 +19,7 @@ fn strategies_for_list() -> impl Strategy<Value = TypeSignature> {
 }
 
 fn generate_list(ty: TypeSignature) -> impl Strategy<Value = Value> {
-    (8u32..32)
+    (1..=32u32)
         .prop_map(move |s| ListTypeData::new_list(ty.clone(), s).unwrap())
         .prop_flat_map(list)
 }
@@ -29,21 +29,11 @@ proptest! {
 
     #[test]
     fn crossprop_map_lte(
-        vals in strategies_for_list()
-        .prop_map(generate_list)
-        .prop_flat_map(|l| proptest::collection::vec(l, 1..=10))) {
+        (list1, list2) in strategies_for_list()
+        .prop_flat_map(|ty| (generate_list(ty.clone()), generate_list(ty.clone())))
+        .prop_map(|(l1, l2)| (PropValue::from(l1), PropValue(l2)))) {
 
-        for chunk in vals.chunks(2) {
-            if let [arg1, arg2] = chunk {
-                let cmd = format!(
-                    "(map <= {} {})",
-                    PropValue(arg1.clone()),
-                    PropValue(arg2.clone())
-                );
-
-                crosscheck_compare_only(&cmd);
-            }
-        }
+            crosscheck_compare_only(&format!("(map <= {list1} {list2})"));
     }
 }
 
