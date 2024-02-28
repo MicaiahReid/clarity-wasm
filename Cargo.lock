@@ -539,7 +539,7 @@ dependencies = [
 [[package]]
 name = "clarity"
 version = "2.2.0"
-source = "git+https://github.com/stacks-network/stacks-core.git?rev=de3e3c679e2db0336b95f1c188a3dae73b3b336f#de3e3c679e2db0336b95f1c188a3dae73b3b336f"
+source = "git+https://github.com/stacks-network/stacks-core.git?rev=1e9df56b255247928679961d0a7c2541ad127f59#1e9df56b255247928679961d0a7c2541ad127f59"
 dependencies = [
  "integer-sqrt",
  "lazy_static",
@@ -556,7 +556,6 @@ dependencies = [
  "sha2-asm",
  "slog",
  "stacks-common",
- "time 0.2.27",
  "wasmtime",
 ]
 
